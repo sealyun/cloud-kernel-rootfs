@@ -39,7 +39,7 @@ var (
 
 const (
 	EcsPassword = "Fanux#123"
-	Branch      = "cluster-image-cri"
+	Branch      = "main"
 )
 
 func loadEnv() {
