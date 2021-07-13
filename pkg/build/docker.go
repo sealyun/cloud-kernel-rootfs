@@ -17,17 +17,15 @@ import (
 var dockerShell = `wget http://gosspublic.alicdn.com/ossutil/1.7.3/ossutil64 &&  chmod a+x ossutil64 && \
 mv ossutil64 /usr/bin/ && \
 yum install -y git conntrack tree && \
-curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh | sudo bash && \
-yum install git-lfs -y && git lfs install && \
-git clone https://github.com/sealyun/cloud-kernel-rootfs && \
-cd cloud-kernel && git checkout %s && git lfs pull && mkdir -p rootfs && cp -rf runtime/rootfs/* rootfs/ && \
+git clone https://github.com/sealyun/cloud-kernel-rootfs && mv cloud-kernel-rootfs cloud-kernel && \
+cd cloud-kernel && git checkout %s && mkdir -p rootfs && cp -rf runtime/rootfs/* rootfs/ && \
 cp -rf runtime/docker/* rootfs/ && mkdir -p rootfs/bin && mkdir -p rootfs/images && mkdir -p rootfs/registry && \
 %s && \
 %s && \
 %s && \
 %s && \
 %s && \
-cd rootfs/scripts && sh init.sh  &&\
+cd rootfs/scripts && chmod a+x * && sh init.sh  &&\
 docker pull fanux/lvscare &&  \
 cp /usr/sbin/conntrack ../bin/`
 

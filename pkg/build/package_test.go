@@ -5,7 +5,7 @@ import (
 )
 
 func TestPackageDocker(t *testing.T) {
-	Package("1.19.9")
+	Package("1.19.9", true)
 }
 
 func TestSaveImage(t *testing.T) {

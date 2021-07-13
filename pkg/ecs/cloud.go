@@ -5,7 +5,7 @@ import (
 	"github.com/sealyun/cloud-kernel-rootfs/pkg/vars/multiplatform"
 )
 
-type cloud interface {
+type Cloud interface {
 	New(amount int, dryRun bool, bandwidthOut bool) []string
 	Delete(instanceId []string, maxCount int)
 	Describe(instanceId string) (*CloudInstanceResponse, error)
@@ -17,8 +17,8 @@ type CloudInstanceResponse struct {
 	PublicIP  string
 }
 
-func NewCloud() cloud {
-	var c cloud
+func NewCloud() Cloud {
+	var c Cloud
 	if multiplatform.Platform(vars.Platform) == multiplatform.LinuxAmd64 {
 		c = &AliyunEcs{}
 	} else {

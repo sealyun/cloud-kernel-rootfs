@@ -30,7 +30,7 @@ import (
 )
 
 var gFetch []string
-var auto bool
+var auto, gc bool
 var k8s string
 
 // runCmd represents the run command
@@ -45,7 +45,7 @@ var runCmd = &cobra.Command{
 			} else {
 				for _, v := range gFetch {
 					logger.Debug("当前更新版本: " + v)
-					if err := _package.Package(strings.ReplaceAll(v, "v", "")); err != nil {
+					if err := _package.Package(strings.ReplaceAll(v, "v", ""), true); err != nil {
 						logger.Error(err)
 						logger.Warn("更新版本发生错误,跳过当前版本: " + v)
 					}
@@ -53,7 +53,7 @@ var runCmd = &cobra.Command{
 			}
 		} else {
 			logger.Debug("当前更新版本: v" + k8s)
-			if err := _package.Package(k8s); err != nil {
+			if err := _package.Package(k8s, gc); err != nil {
 				logger.Error(err)
 				logger.Warn("更新版本发生错误,跳过当前版本: v" + k8s)
 			}
@@ -131,6 +131,7 @@ func init() {
 	runCmd.Flags().Float64Var(&vars.DefaultPrice, "price", 50, "离线包的价格")
 	runCmd.Flags().Float64Var(&vars.DefaultZeroPrice, "zoro-price", 0.01, "离线包.0版本的价格")
 	runCmd.Flags().BoolVar(&auto, "auto", false, "自动更新所有版本")
+	runCmd.Flags().BoolVar(&gc, "gc", false, "自动回收ecs")
 	runCmd.Flags().StringVar(&k8s, "k8s", "1.19.8", "默认更新版本")
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:

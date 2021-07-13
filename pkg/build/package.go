@@ -19,7 +19,7 @@ type _package interface {
 	SavePackage() error
 }
 
-func Package(k8sVersion string) error {
+func Package(k8sVersion string, gc bool) error {
 	err := vars.LoadVars(k8sVersion)
 	if err != nil {
 		return err
@@ -30,9 +30,16 @@ func Package(k8sVersion string) error {
 	}
 	logger.Info("1. begin create ecs")
 	var instanceInfo *ecs.CloudInstanceResponse
-	defer func() {
-		ecs.NewCloud().Delete(instance, 10)
-	}()
+	if gc {
+		defer func() {
+			ecs.NewCloud().Delete(instance, 10)
+		}()
+	} else {
+		defer func() {
+			logger.Info("end. ecs instanceId: %s", instance)
+		}()
+	}
+
 	if err = retry.Do(func() error {
 		var err error
 		logger.Debug("1. retry fetch ecs info " + instance[0])
