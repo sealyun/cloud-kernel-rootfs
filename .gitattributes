@@ -1,0 +1,8 @@
+runtime/docker/cri/runc filter=lfs diff=lfs merge=lfs -text
+runtime/docker/cri/containerd filter=lfs diff=lfs merge=lfs -text
+runtime/docker/cri/containerd-shim filter=lfs diff=lfs merge=lfs -text
+runtime/docker/cri/ctr filter=lfs diff=lfs merge=lfs -text
+runtime/docker/cri/docker filter=lfs diff=lfs merge=lfs -text
+runtime/docker/cri/docker-init filter=lfs diff=lfs merge=lfs -text
+runtime/docker/cri/docker-proxy filter=lfs diff=lfs merge=lfs -text
+runtime/docker/cri/dockerd filter=lfs diff=lfs merge=lfs -text
