@@ -42,7 +42,7 @@ if ! command_exists docker; then
   [ -d  /etc/docker/ ] || mkdir /etc/docker/  -p
 
   chmod -R 755 ../cri
-  cp -r ../cri/* /usr/bin
+  tar -zxvf ../cri/docker.tar.gz -C /usr/bin
   chmod a+x /usr/bin
   chmod a+x /usr/bin/docker
   chmod a+x /usr/bin/dockerd
