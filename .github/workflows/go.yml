@@ -31,5 +31,4 @@ jobs:
       with:
         artifacts: "cloud-kernel,cloud-kernel-arm64"
         bodyFile: "README.MD"
-        prerelease: true
         token: ${{ secrets.GITHUB_TOKEN }}
