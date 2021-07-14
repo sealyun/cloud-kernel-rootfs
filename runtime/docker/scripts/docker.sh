@@ -24,8 +24,6 @@ if ! command_exists docker; then
     	cp ../etc/docker.service /lib/systemd/system/docker.service
     ;;
     alios)
-      modprobe br_netfilter
-      echo 1 > /proc/sys/net/bridge/bridge-nf-call-iptables
       ip link add name docker0 type bridge
       ip addr add dev docker0 172.17.0.1/16
     	cp ../etc/docker.service /usr/lib/systemd/system/docker.service
