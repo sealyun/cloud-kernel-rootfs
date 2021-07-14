@@ -23,9 +23,6 @@ if ! command_exists docker; then
     ubuntu|deepin|debian|raspbian|kylin)
     	cp ../etc/docker.service /lib/systemd/system/docker.service
     ;;
-    centos|rhel|ol|sles)
-    	cp ../etc/docker.service /usr/lib/systemd/system/docker.service
-    ;;
     alios)
       modprobe br_netfilter
       echo 1 > /proc/sys/net/bridge/bridge-nf-call-iptables
@@ -34,8 +31,7 @@ if ! command_exists docker; then
     	cp ../etc/docker.service /usr/lib/systemd/system/docker.service
     ;;
     *)
-    	echo "current system not support"
-    	exit 1
+    	cp ../etc/docker.service /usr/lib/systemd/system/docker.service
     ;;
   esac
 
