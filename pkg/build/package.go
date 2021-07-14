@@ -20,10 +20,7 @@ type _package interface {
 }
 
 func Package(k8sVersion string, gc bool) error {
-	err := vars.LoadVars(k8sVersion)
-	if err != nil {
-		return err
-	}
+
 	instance := ecs.NewCloud().New(1, false, true)
 	if instance == nil {
 		return errors.New("create ecs is error")
@@ -40,7 +37,7 @@ func Package(k8sVersion string, gc bool) error {
 		}()
 	}
 
-	if err = retry.Do(func() error {
+	if err := retry.Do(func() error {
 		var err error
 		logger.Debug("1. retry fetch ecs info " + instance[0])
 		instanceInfo, err = ecs.NewCloud().Describe(instance[0])
@@ -64,7 +61,7 @@ func Package(k8sVersion string, gc bool) error {
 		Timeout:  nil,
 	}
 	logger.Debug("2. connect ssh: " + publicIP)
-	if err = retry.Do(func() error {
+	if err := retry.Do(func() error {
 		var err error
 		logger.Debug("2. retry test ecs ssh: " + publicIP)
 		_, err = s.CmdAndError(publicIP, "ls /")
@@ -75,6 +72,9 @@ func Package(k8sVersion string, gc bool) error {
 		}
 	}, 20, 500*time.Millisecond, true); err != nil {
 		return utils.ProcessError(err)
+	}
+	if err := vars.LoadVars(k8sVersion, publicIP, s); err != nil {
+		return err
 	}
 	var k8s _package
 	if utils.For120(k8sVersion) {
@@ -87,24 +87,24 @@ func Package(k8sVersion string, gc bool) error {
 		return utils.ProcessError(errors.New("k8s interface is nil"))
 	}
 	logger.Info("3. install k8s[ " + k8sVersion + " ] : " + publicIP)
-	if err = k8s.InitK8sServer(); err != nil {
+	if err := k8s.InitK8sServer(); err != nil {
 		return utils.ProcessError(err)
 	}
-	if err = k8s.RunK8sServer(); err != nil {
+	if err := k8s.RunK8sServer(); err != nil {
 		return utils.ProcessError(err)
 	}
 	logger.Info("4. wait k8s[ " + k8sVersion + " ] pull all images: " + publicIP)
-	if err = checkKubeStatus("4", publicIP, s, false); err != nil {
+	if err := checkKubeStatus("4", publicIP, s, false); err != nil {
 		return utils.ProcessError(err)
 	}
-	if err = s.CmdAsync(publicIP, "kubectl get pod -n kube-system"); err != nil {
+	if err := s.CmdAsync(publicIP, "kubectl get pod -n kube-system"); err != nil {
 		return utils.ProcessError(err)
 	}
-	if err = k8s.WaitImages(); err != nil {
+	if err := k8s.WaitImages(); err != nil {
 		return utils.ProcessError(err)
 	}
 	logger.Info("5. k8s[ " + k8sVersion + " ] image save: " + publicIP)
-	if err = k8s.SavePackage(); err != nil {
+	if err := k8s.SavePackage(); err != nil {
 		return utils.ProcessError(err)
 	}
 	logger.Info("6. k8s[ " + k8sVersion + " ] testing: " + publicIP)

@@ -1,8 +1,11 @@
 package vars
 
 import (
+	"github.com/sealyun/cloud-kernel-rootfs/pkg/logger"
+	"github.com/sealyun/cloud-kernel-rootfs/pkg/sshcmd/sshutil"
 	"github.com/sealyun/cloud-kernel-rootfs/pkg/vars/multiplatform"
 	"os"
+	"strings"
 )
 
 type DownloadBin struct {
@@ -60,7 +63,8 @@ func loadEnv() {
 	}
 }
 
-func LoadVars(k8sVersion string) error {
+func LoadVars(k8sVersion, publicIP string, s sshutil.SSH) error {
+	loadVersion(publicIP, s)
 	loadEnv()
 	p := multiplatform.Platform(Platform)
 	rootfs := "rootfs"
@@ -76,6 +80,31 @@ func LoadVars(k8sVersion string) error {
 		SSHCmd:         multiplatform.NewSSHCmd(defaultSSHCmdVersion, rootfs, p),
 	}
 	return nil
+}
+
+func loadVersion(publicIP string, s sshutil.SSH) {
+	//install jq
+	err := s.CmdAsync(publicIP, "yum install -y jq")
+	if err != nil {
+		logger.Error("安装jq失败: %v", err)
+		return
+	}
+	sealerVersion := "curl -LsSf https://api.github.com/repos/alibaba/sealer/releases/latest | jq -r \".tag_name\""
+	sshcmdVersion := "curl -LsSf https://api.github.com/repos/cuisongliu/sshcmd/releases/latest | jq -r \".tag_name\""
+	nerdVersion := "curl -LsSf https://api.github.com/repos/containerd/nerdctl/releases/latest | jq -r \".tag_name\""
+
+	if version := s.CmdToString(publicIP, sealerVersion, ""); version != "" {
+		defaultSealVersion = strings.ReplaceAll(version, "v", "")
+		logger.Info("获取sealer最新版本: %s", defaultSealVersion)
+	}
+	if version := s.CmdToString(publicIP, sshcmdVersion, ""); version != "" {
+		defaultSSHCmdVersion = strings.ReplaceAll(version, "v", "")
+		logger.Info("获取sshcmd最新版本: %s", defaultSSHCmdVersion)
+	}
+	if version := s.CmdToString(publicIP, nerdVersion, ""); version != "" {
+		defaultNerdctlVersion = strings.ReplaceAll(version, "v", "")
+		logger.Info("获取nerdctl最新版本: %s", defaultNerdctlVersion)
+	}
 }
 
 const MarketYaml = `
