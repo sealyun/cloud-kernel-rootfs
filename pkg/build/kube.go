@@ -27,12 +27,12 @@ func checkKubeStatus(step string, publicIP string, s sshutil.SSH, allRunning boo
 		if notRunningNum != "" && notRunningNum != "0" {
 			return errors.New("retry error")
 		}
-		checkShell = "kubectl  get pod -n kube-system  | grep  \"Running\" | grep calico-node | wc -l"
-		calicoNodeNum := strings.TrimSpace(s.CmdToString(publicIP, checkShell, ""))
-		logger.Debug("当前calico的Running状态的的数量为: " + calicoNodeNum)
-		if calicoNodeNum == "0" {
-			return errors.New("retry error")
-		}
+		//checkShell = "kubectl  get pod -n kube-system  | grep  \"Running\" | grep calico-node | wc -l"
+		//calicoNodeNum := strings.TrimSpace(s.CmdToString(publicIP, checkShell, ""))
+		//logger.Debug("当前calico的Running状态的的数量为: " + calicoNodeNum)
+		//if calicoNodeNum == "0" {
+		//	return errors.New("retry error")
+		//}
 		if allRunning {
 			checkShell = "kubectl  get pod -n kube-system  | grep  0/ | wc -l"
 			zeroRunningNum := strings.TrimSpace(s.CmdToString(publicIP, checkShell, ""))
