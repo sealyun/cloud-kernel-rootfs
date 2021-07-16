@@ -21,7 +21,7 @@ git clone https://github.com/alibaba/sealer && \
 git clone https://github.com/sealyun/cloud-kernel-rootfs && mv cloud-kernel-rootfs cloud-kernel && \
 cd cloud-kernel && git checkout %s && mkdir -p rootfs && mkdir -p rootfs/bin &&  mkdir -p rootfs/registry && \
 cp -rf runtime/rootfs/* rootfs/ && cp -rf runtime/docker/* rootfs/   && \
-cp -rf ../sealer/rootfs/rootfs/* rootfs/ && cp -rf ../sealer/rootfs/docker/* rootfs/   && \
+cp -rf ../sealer/filesystem/rootfs/rootfs/* rootfs/ && cp -rf ../sealer/filesystem/rootfs/docker/* rootfs/   && \
 %s && \
 %s && \
 %s && \
