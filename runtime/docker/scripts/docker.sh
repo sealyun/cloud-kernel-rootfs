@@ -23,13 +23,17 @@ if ! command_exists docker; then
     ubuntu|deepin|debian|raspbian|kylin)
     	cp ../etc/docker.service /lib/systemd/system/docker.service
     ;;
+  	centos|rhel|ol|sles|kylin|neokylin)
+			cp ../etc/docker.service /usr/lib/systemd/system/docker.service
+		;;
     alios)
       ip link add name docker0 type bridge
       ip addr add dev docker0 172.17.0.1/16
     	cp ../etc/docker.service /usr/lib/systemd/system/docker.service
     ;;
     *)
-    	cp ../etc/docker.service /usr/lib/systemd/system/docker.service
+			echo "unknown system to use /lib/systemd/system/docker.service"
+			cp ../etc/docker.service /lib/systemd/system/docker.service
     ;;
   esac
 

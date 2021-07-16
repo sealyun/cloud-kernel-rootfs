@@ -4,7 +4,9 @@ modprobe -- ip_vs
 modprobe -- ip_vs_rr
 modprobe -- ip_vs_wrr
 modprobe -- ip_vs_sh
+# 1.20需要开启br_netfilter
 modprobe -- br_netfilter
+modprobe -- bridge
 ## version_ge 4.19 4.19 true ;
 ## version_ge 5.4 4.19 true ;
 ## version_ge 3.10 4.19 false ;
