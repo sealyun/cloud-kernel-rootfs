@@ -47,6 +47,7 @@ if ! command_exists docker; then
   systemctl enable docker.service
   systemctl restart docker.service
   cp ../etc/daemon.json /etc/docker
+  sed -i "s/$2:5000/$2:$3/g" /etc/docker/daemon.json
 fi
 systemctl daemon-reload
 systemctl restart docker.service
