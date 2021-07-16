@@ -43,7 +43,6 @@ func (a *AliyunEcs) Healthy() error {
 }
 
 func (a *AliyunEcs) New(amount int, dryRun bool, bandwidthOut bool) []string {
-	loadVars()
 	client := a.getClient()
 	// 创建请求并设置参数
 	hk := ecs.CreateRunInstancesRequest()
