@@ -34,7 +34,7 @@ func (a *AliyunEcs) Healthy() error {
 		return err
 	}
 	r := ecs.CreateDescribeZonesRequest()
-	r.RegionId = "cn-hongkong"
+	r.RegionId = ALIRegionId
 	_, err = cli.DescribeZones(r)
 	if err != nil {
 		return errors.New("阿里云 " + err.Error())
@@ -43,20 +43,21 @@ func (a *AliyunEcs) Healthy() error {
 }
 
 func (a *AliyunEcs) New(amount int, dryRun bool, bandwidthOut bool) []string {
+	loadVars()
 	client := a.getClient()
 	// 创建请求并设置参数
 	hk := ecs.CreateRunInstancesRequest()
-	hk.ImageId = "centos_7_04_64_20G_alibase_201701015.vhd"
-	hk.InstanceType = "ecs.c5.xlarge"
-	hk.InternetChargeType = "PayByTraffic"
-	hk.InternetMaxBandwidthIn = "100"
-	hk.InternetMaxBandwidthOut = "100"
-	hk.InstanceChargeType = "PostPaid"
-	hk.SpotStrategy = "SpotAsPriceGo"
-	hk.RegionId = "cn-hongkong"
-	hk.SecurityGroupId = "sg-j6cb45dolegxcb32b47w"
-	hk.VSwitchId = "vsw-j6cvaap9o5a7et8uumqyx"
-	hk.ZoneId = "cn-hongkong-c"
+	hk.ImageId = ALIImageId
+	hk.InstanceType = ALIInstanceType
+	hk.InternetChargeType = ALIInternetChargeType
+	hk.InternetMaxBandwidthIn = ALIInternetMaxBandwidthIn
+	hk.InternetMaxBandwidthOut = ALIInternetMaxBandwidthOut
+	hk.InstanceChargeType = ALIInstanceChargeType
+	hk.SpotStrategy = ALISpotStrategy
+	hk.RegionId = ALIRegionId
+	hk.SecurityGroupId = ALISecurityGroupId
+	hk.VSwitchId = ALIVSwitchId
+	hk.ZoneId = ALIZoneId
 	hk.Password = vars.EcsPassword
 	hk.Amount = requests.Integer(strconv.Itoa(amount))
 	hk.ClientToken = utils.GetUUID()

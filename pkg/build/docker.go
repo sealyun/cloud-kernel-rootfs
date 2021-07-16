@@ -97,13 +97,6 @@ func (d *dockerK8s) RunK8sServer() error {
 	if err != nil {
 		return utils.ProcessError(err)
 	}
-	//writeCalico := `cd cloud-kernel/rootfs && mkdir -p cni/calico && echo '%s' > cni/calico/calico.yaml.tmpl`
-	//calico := &templates.Calico{}
-	//writeShell = fmt.Sprintf(writeCalico, calico.Template())
-	//err = d.ssh.CmdAsync(d.publicIP, writeShell)
-	//if err != nil {
-	//	return utils.ProcessError(err)
-	//}
 	//kubeadm init
 	writeShell = `cd cloud-kernel/rootfs/etc && kubeadm init --config kubeadm-config.yaml && \
 mkdir ~/.kube && cp /etc/kubernetes/admin.conf ~/.kube/config && \
@@ -112,12 +105,6 @@ kubectl taint nodes --all node-role.kubernetes.io/master- `
 	if err != nil {
 		return utils.ProcessError(err)
 	}
-	//calico
-	//writeShell = fmt.Sprintf(`echo '%s' | kubectl apply -f -`, calico.TemplateConvert())
-	//err = d.ssh.CmdAsync(d.publicIP, writeShell)
-	//if err != nil {
-	//	return utils.ProcessError(err)
-	//}
 	return nil
 }
 func (d *dockerK8s) WaitImages() error {
@@ -140,31 +127,12 @@ func (d *dockerK8s) WaitImages() error {
 	return nil
 }
 
-func (d *dockerK8s) SavePackage() error {
-	writeCalico := `cd cloud-kernel  && echo '%s' >  oss-config`
-	ossConfig := &templates.OSSConfig{
-		KeyId:     vars.AkID,
-		KeySecret: vars.AkSK,
-	}
-	writeShell := fmt.Sprintf(writeCalico, ossConfig.TemplateConvert())
-	err := d.ssh.CmdAsync(d.publicIP, writeShell)
-	if err != nil {
-		return utils.ProcessError(err)
-	}
-
+func (d *dockerK8s) SaveImages() error {
 	rootfs := vars.Bin.Rootfs
-	err = d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(dockerSaveShell, rootfs.FinalShell()))
+	err := d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(dockerSaveShell, rootfs.FinalShell()))
 	if err != nil {
 		return utils.ProcessError(err)
 	}
 
-	pushShell := `sealer login  registry-vpc.cn-hongkong.aliyuncs.com -u %s -p %s && \
-sealer tag  %s registry-vpc.cn-hongkong.aliyuncs.com/sealyun/%s && \
-sealer push registry-vpc.cn-hongkong.aliyuncs.com/sealyun/%s`
-	imageName := rootfs.FetchWgetURL()
-	err = d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(pushShell, vars.RegistryUserName, vars.RegistryPassword, imageName, imageName, imageName))
-	if err != nil {
-		return utils.ProcessError(err)
-	}
 	return nil
 }

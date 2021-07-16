@@ -9,35 +9,34 @@ import (
 )
 
 type DownloadBin struct {
-	CriCtl         multiplatform.Vars
-	Kubernetes     multiplatform.Vars
-	MarketCtl      multiplatform.Vars
-	NerdCtl        multiplatform.Vars
-	SealyunWebsite multiplatform.Vars
-	SealUtil       multiplatform.Vars
-	Sealer         multiplatform.Vars
-	SSHCmd         multiplatform.Vars
-	Rootfs         multiplatform.Vars
+	CriCtl     multiplatform.Vars
+	Kubernetes multiplatform.Vars
+	MarketCtl  multiplatform.Vars
+	NerdCtl    multiplatform.Vars
+	SealUtil   multiplatform.Vars
+	Sealer     multiplatform.Vars
+	SSHCmd     multiplatform.Vars
+	Rootfs     multiplatform.Vars
 }
 
 var (
 	DingDing         string
 	AkID             string
 	AkSK             string
+	OSSAkID          string
+	OSSAkSK          string
+	OSSRepo          string
 	RegistryUserName string
+	RegistryAddress  string
+	RegistryRepo     string
 	RegistryPassword string
-	MarketCtlToken   string
 	Platform         string
 	Bin              DownloadBin
-	DefaultPrice     float64
-	DefaultZeroPrice float64
-	DefaultClass     = "cloud_kernel" //cloud_kernel
 
-	defaultSealVersion      = "0.2.1"
-	defaultMarketCtlVersion = "1.0.5" //v1.0.5
-	defaultSSHCmdVersion    = "1.5.5"
-	defaultNerdctlVersion   = "0.7.3"
-	defaultCriCtlVersion    = "1.20.0"
+	defaultSealVersion    = "0.2.1"
+	defaultSSHCmdVersion  = "1.5.5"
+	defaultNerdctlVersion = "0.7.3"
+	defaultCriCtlVersion  = "1.20.0"
 )
 
 const (
@@ -45,12 +44,37 @@ const (
 	Branch      = "main"
 )
 
+func LoadAKSK() {
+	if OSSAkID == "" {
+		if v := os.Getenv("OSS_AKID"); v != "" {
+			OSSAkID = v
+		}
+	}
+	if OSSAkSK == "" {
+		if v := os.Getenv("OSS_AKSK"); v != "" {
+			OSSAkSK = v
+		}
+	}
+	if OSSRepo == "" {
+		if v := os.Getenv("OSS_REPO"); v != "" {
+			OSSRepo = v
+		}
+	}
+	if AkID == "" {
+		if v := os.Getenv("ECS_AKID"); v != "" {
+			AkID = v
+		}
+	}
+	if AkSK == "" {
+		if v := os.Getenv("ECS_AKSK"); v != "" {
+			AkSK = v
+		}
+	}
+}
+
 func loadEnv() {
 	if v := os.Getenv("SEALER_VERSION"); v != "" {
 		defaultSealVersion = v
-	}
-	if v := os.Getenv("MARKET_CTL_VERSION"); v != "" {
-		defaultMarketCtlVersion = v
 	}
 	if v := os.Getenv("SSH_CMD_VERSION"); v != "" {
 		defaultSSHCmdVersion = v
@@ -69,15 +93,13 @@ func LoadVars(k8sVersion, publicIP string, s sshutil.SSH) error {
 	p := multiplatform.Platform(Platform)
 	rootfs := "rootfs"
 	Bin = DownloadBin{
-		CriCtl:         multiplatform.NewCriCTL(defaultCriCtlVersion, rootfs, p),
-		Kubernetes:     multiplatform.NewKubernetes(k8sVersion, rootfs, p),
-		Rootfs:         multiplatform.NewRootfs(k8sVersion, p),
-		MarketCtl:      multiplatform.NewMarketctl(defaultMarketCtlVersion, rootfs, p),
-		NerdCtl:        multiplatform.NewNerdctl(defaultNerdctlVersion, rootfs, p),
-		SealyunWebsite: multiplatform.NewSealyunWebsite(p),
-		SealUtil:       multiplatform.NewSeautil(defaultSealVersion, rootfs, p),
-		Sealer:         multiplatform.NewSealer(defaultSealVersion, p),
-		SSHCmd:         multiplatform.NewSSHCmd(defaultSSHCmdVersion, rootfs, p),
+		CriCtl:     multiplatform.NewCriCTL(defaultCriCtlVersion, rootfs, p),
+		Kubernetes: multiplatform.NewKubernetes(k8sVersion, rootfs, p),
+		Rootfs:     multiplatform.NewRootfs(k8sVersion, p),
+		NerdCtl:    multiplatform.NewNerdctl(defaultNerdctlVersion, rootfs, p),
+		SealUtil:   multiplatform.NewSeautil(defaultSealVersion, rootfs, p),
+		Sealer:     multiplatform.NewSealer(defaultSealVersion, p),
+		SSHCmd:     multiplatform.NewSSHCmd(defaultSSHCmdVersion, rootfs, p),
 	}
 	return nil
 }
@@ -106,17 +128,3 @@ func loadVersion(publicIP string, s sshutil.SSH) {
 		logger.Info("获取nerdctl最新版本: %s", defaultNerdctlVersion)
 	}
 }
-
-const MarketYaml = `
-market:
-  body:
-    spec:
-      name: v%s
-      price: %.2f
-      product:
-        class: %s
-        productName: %s
-      url: /tmp/kube%s.tar.gz
-    status:
-      productVersionStatus: ONLINE
-  kind: productVersion`

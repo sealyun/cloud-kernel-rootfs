@@ -1,4 +1,4 @@
-package huawei
+package ecs
 
 import (
 	"fmt"
@@ -9,11 +9,6 @@ import (
 	"github.com/sealyun/cloud-kernel-rootfs/pkg/vars"
 )
 
-const (
-	projectID = "06b275f707800f272feec0147ee22b32"
-	zone      = "ap-southeast-1a"
-)
-
 type HClient struct {
 	Zone      string
 	EcsClient *ecs.EcsClient
@@ -21,16 +16,16 @@ type HClient struct {
 }
 
 func NewClientWithAccessKey(ak, sk string) *HClient {
-	n := len(zone)
-	ecsEndpoint := fmt.Sprintf("https://ecs.%s.myhuaweicloud.com", zone[:n-1])
-	vpcEndpoint := fmt.Sprintf("https://vpc.%s.myhuaweicloud.com", zone[:n-1])
+	n := len(HWZone)
+	ecsEndpoint := fmt.Sprintf("https://ecs.%s.myhuaweicloud.com", HWZone[:n-1])
+	vpcEndpoint := fmt.Sprintf("https://vpc.%s.myhuaweicloud.com", HWZone[:n-1])
 	auth := basic.NewCredentialsBuilder().
 		WithAk(ak).
 		WithSk(sk).
-		WithProjectId(projectID).
+		WithProjectId(HWProjectID).
 		Build()
 	return &HClient{
-		Zone: zone,
+		Zone: HWZone,
 		EcsClient: ecs.NewEcsClient(
 			ecs.EcsClientBuilder().
 				WithEndpoint(ecsEndpoint).
@@ -60,13 +55,13 @@ func (h *HClient) RunInstances(amount int, dryRun bool, bandwidthOut bool) ([]st
 	request := &model.CreatePostPaidServersRequest{}
 	var listPostPaidServerNicNicsPostPaidServer = []model.PostPaidServerNic{
 		{
-			SubnetId: "179d3994-1a14-44df-bfb1-bb1e5495bb45",
+			SubnetId: HWSubnetId,
 		},
 	}
 	var listPostPaidServerTagServerTagsPostPaidServer = []model.PostPaidServerTag{
 		{
 			Key:   "test",
-			Value: "sealos",
+			Value: "rootfs",
 		},
 	}
 	publicipPostPaidServer := &model.PostPaidServerPublicip{}
@@ -79,7 +74,7 @@ func (h *HClient) RunInstances(amount int, dryRun bool, bandwidthOut bool) ([]st
 			Chargemode: &chargemodePostPaidServerEipBandwidth,
 		}
 		eipPostPaidServerPublicip := &model.PostPaidServerEip{
-			Iptype:    "5_bgp",
+			Iptype:    HWIpType,
 			Bandwidth: bandwidthPostPaidServerEip,
 		}
 		publicipPostPaidServer = &model.PostPaidServerPublicip{
@@ -96,14 +91,14 @@ func (h *HClient) RunInstances(amount int, dryRun bool, bandwidthOut bool) ([]st
 	}
 	serverCreatePostPaidServersRequestBody := &model.PostPaidServer{
 		AvailabilityZone: h.Zone,
-		FlavorRef:        "kc1.large.2",
-		ImageRef:         "04678140-fcc1-465d-ba36-3a2b19d155f9",
-		Name:             "sealos",
+		FlavorRef:        HWFlavorRef,
+		ImageRef:         HWImageId,
+		Name:             "rootfs",
 		Nics:             listPostPaidServerNicNicsPostPaidServer,
 		Publicip:         publicipPostPaidServer,
 		RootVolume:       rootVolumePostPaidServer,
 		ServerTags:       &listPostPaidServerTagServerTagsPostPaidServer,
-		Vpcid:            "085d5e2a-8339-4780-bb6b-8b418959fc9a",
+		Vpcid:            HWVpcId,
 		AdminPass:        &adminPassPostPaidServer,
 		IsAutoRename:     &isAutoRenamePostPaidServer,
 		Count:            &countPostPaidServer,

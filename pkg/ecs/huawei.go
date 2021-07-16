@@ -3,23 +3,22 @@ package ecs
 import (
 	"errors"
 	"github.com/huaweicloud/huaweicloud-sdk-go-v3/services/ecs/v2/model"
-	"github.com/sealyun/cloud-kernel-rootfs/pkg/ecs/huawei"
 	"github.com/sealyun/cloud-kernel-rootfs/pkg/logger"
 	cutils "github.com/sealyun/cloud-kernel-rootfs/pkg/utils"
 	"github.com/sealyun/cloud-kernel-rootfs/pkg/vars"
 	"sync"
 )
 
-func (a *HuaweiEcs) getClient() *huawei.HClient {
+func (a *HuaweiEcs) getClient() *HClient {
 	a.ecsOnce.Do(func() {
-		a.ecsHKCli = huawei.NewClientWithAccessKey(vars.AkID, vars.AkSK)
+		a.ecsHKCli = NewClientWithAccessKey(vars.AkID, vars.AkSK)
 	})
 	return a.ecsHKCli
 }
 
 type HuaweiEcs struct {
 	ecsOnce  sync.Once
-	ecsHKCli *huawei.HClient
+	ecsHKCli *HClient
 }
 
 func (a *HuaweiEcs) Healthy() error {

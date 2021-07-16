@@ -15,20 +15,13 @@ import (
 )
 
 const (
-	githubURL  = "https://api.github.com/repos/kubernetes/kubernetes/releases"
-	SealyunURL = "https://www.sealyun.com/api/v2/classes/%s/products/%s/versions"
+	githubURL = "https://api.github.com/repos/kubernetes/kubernetes/releases"
 )
 
 type release struct {
 	CreatedAt time.Time `json:"created_at"`
 	TagName   string    `json:"tag_name"`
 	Draft     bool      `json:"draft"`
-}
-type sealyunVersion struct {
-	Code int `json:"code"`
-	Data []struct {
-		Name string `json:"name"`
-	} `json:"data"`
 }
 
 func Fetch() ([]string, error) {

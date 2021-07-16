@@ -1,35 +1,83 @@
+/*
+Copyright 2021 cuisongliu@qq.com.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package build
 
 import (
 	"fmt"
 	"github.com/sealyun/cloud-kernel-rootfs/pkg/sshcmd/sshutil"
+	"github.com/sealyun/cloud-kernel-rootfs/pkg/templates"
 	"github.com/sealyun/cloud-kernel-rootfs/pkg/utils"
 	"github.com/sealyun/cloud-kernel-rootfs/pkg/vars"
+	"strings"
 )
 
-func upload(publicIP, k8sVersion string) {
-	s := sshutil.SSH{
-		User:     "root",
-		Password: vars.EcsPassword,
-		Timeout:  nil,
+type upload struct {
+	ssh        sshutil.SSH
+	publicIP   string
+	k8sVersion string
+}
+
+func NewUpload(publicIP string, k8sVersion string) *upload {
+
+	return &upload{
+		ssh: sshutil.SSH{
+			User:     "root",
+			Password: vars.EcsPassword,
+			Timeout:  nil,
+		},
+		publicIP:   publicIP,
+		k8sVersion: k8sVersion,
 	}
-	if err := downloadBin(s, publicIP, vars.Bin.MarketCtl.FetchWgetURL(), "marketctl"); err != nil {
-		_ = utils.ProcessError(err)
-		return
+}
+
+func (d *upload) Upload() error {
+	rootfs := vars.Bin.Rootfs
+	imageName := rootfs.FetchWgetURL()
+	if vars.OSSAkID != "" && vars.OSSAkSK != "" {
+		writeCalico := `cd cloud-kernel  && echo '%s' >  oss-config`
+		ossConfig := &templates.OSSConfig{
+			KeyId:     vars.OSSAkID,
+			KeySecret: vars.OSSAkSK,
+		}
+		writeShell := fmt.Sprintf(writeCalico, ossConfig.TemplateConvert())
+		err := d.ssh.CmdAsync(d.publicIP, writeShell)
+		if err != nil {
+			return utils.ProcessError(err)
+		}
+		//kubernetes-amd64:v1.15 > kube-amd64-v1.15.tar
+		tarName := strings.ReplaceAll(imageName, "kubernetes", "kube")
+		tarName = strings.ReplaceAll(imageName, ":", "-")
+		tarName = tarName + ".tar"
+		tarShell := `cd cloud-kernel && sealer save -o  %s %s && \
+ossutil64 -c  oss-config cp -f %s oss://%s/%s`
+		err = d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(tarShell, tarName, imageName, tarName, vars.OSSRepo, tarName))
+		if err != nil {
+			return utils.ProcessError(err)
+		}
 	}
-	_, v := utils.GetMajorMinorInt(k8sVersion)
-	var price = vars.DefaultPrice
-	if v == 0 {
-		price = vars.DefaultZeroPrice
+	pushShell := `sealer login  %s -u %s -p %s && \
+sealer tag  %s  %s && \
+sealer push %s`
+	addr := vars.RegistryAddress
+
+	registryImage := fmt.Sprintf("%s/%s/%s", vars.RegistryAddress, vars.RegistryRepo, imageName)
+
+	err := d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(pushShell, addr, vars.RegistryUserName, vars.RegistryPassword, imageName, registryImage, registryImage))
+	if err != nil {
+		return utils.ProcessError(err)
 	}
-	yaml := fmt.Sprintf(vars.MarketYaml, k8sVersion, price, vars.DefaultClass, vars.Bin.SealyunWebsite.FetchWgetURL(), k8sVersion)
-	_ = s.CmdAsync(publicIP, "echo \""+yaml+"\" > /tmp/marketctl_"+k8sVersion+".yaml")
-	_ = s.CmdAsync(publicIP, "cat /tmp/marketctl_"+k8sVersion+".yaml")
-	//marketctl apply -f /tmp/marketctl_%s.yaml --domain https://www.sealyun.com --token %s --dd-token %s
-	marketCMD := fmt.Sprintf("marketctl apply -f /tmp/marketctl_%s.yaml --ci --token %s",
-		k8sVersion, vars.MarketCtlToken)
-	if vars.DingDing != "" {
-		marketCMD = marketCMD + " --dd-token " + vars.DingDing
-	}
-	_ = s.CmdAsync(publicIP, marketCMD)
+	return nil
 }
