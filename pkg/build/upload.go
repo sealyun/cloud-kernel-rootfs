@@ -47,12 +47,12 @@ func (d *upload) Upload() error {
 	rootfs := vars.Bin.Rootfs
 	imageName := rootfs.FetchWgetURL()
 	if vars.OSSAkID != "" && vars.OSSAkSK != "" {
-		writeCalico := `cd cloud-kernel  && echo '%s' >  oss-config`
+		writeOSS := `cd cloud-kernel  && echo '%s' >  oss-config`
 		ossConfig := &templates.OSSConfig{
 			KeyId:     vars.OSSAkID,
 			KeySecret: vars.OSSAkSK,
 		}
-		writeShell := fmt.Sprintf(writeCalico, ossConfig.TemplateConvert())
+		writeShell := fmt.Sprintf(writeOSS, ossConfig.TemplateConvert())
 		err := d.ssh.CmdAsync(d.publicIP, writeShell)
 		if err != nil {
 			return utils.ProcessError(err)

@@ -54,7 +54,6 @@ func (c *rootfs) FetchWgetURL() string {
 }
 
 func (c *rootfs) FinalShell() string {
-	shell := `sealer build -f Kubefile -b "local" -t %s . &&  sealer save -o ../%s %s && \
-ossutil64 -c ../oss-config cp -f ../%s oss://sealyun-rootfs/%s`
+	shell := `sealer build -f Kubefile -b "local" -t %s`
 	return fmt.Sprintf(shell, c.imageName, c.tarName, c.imageName, c.tarName, c.tarName)
 }
