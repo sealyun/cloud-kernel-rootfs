@@ -54,6 +54,6 @@ func (c *rootfs) FetchWgetURL() string {
 }
 
 func (c *rootfs) FinalShell() string {
-	shell := `sealer build -f Kubefile -b "local" -t %s`
+	shell := `sealer build -f Kubefile -b "local" -t %s .`
 	return fmt.Sprintf(shell, c.imageName)
 }

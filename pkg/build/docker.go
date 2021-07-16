@@ -17,9 +17,11 @@ import (
 var dockerShell = `wget http://gosspublic.alicdn.com/ossutil/1.7.3/ossutil64 &&  chmod a+x ossutil64 && \
 mv ossutil64 /usr/bin/ && \
 yum install -y git conntrack tree && \
+git clone https://github.com/alibaba/sealer && \
 git clone https://github.com/sealyun/cloud-kernel-rootfs && mv cloud-kernel-rootfs cloud-kernel && \
-cd cloud-kernel && git checkout %s && mkdir -p rootfs && cp -rf runtime/rootfs/* rootfs/ && \
-cp -rf runtime/docker/* rootfs/ && mkdir -p rootfs/bin && mkdir -p rootfs/images && mkdir -p rootfs/registry && \
+cd cloud-kernel && git checkout %s && mkdir -p rootfs && mkdir -p rootfs/bin &&  mkdir -p rootfs/registry \
+cp -rf runtime/rootfs/* rootfs/ && cp -rf runtime/docker/* rootfs/   && \
+cp -rf ../sealer/rootfs/rootfs/* rootfs/ && cp -rf ../sealer/rootfs/docker/* rootfs/   && \
 %s && \
 %s && \
 %s && \
