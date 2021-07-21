@@ -13,10 +13,9 @@ import (
 )
 
 type _package interface {
-	InitK8sServer() error
-	RunK8sServer() error
+	InitCRI() error
+	PullImages() error
 	WaitImages() error
-	SaveImages() error
 }
 
 func Package(k8sVersion string, gc bool) error {
@@ -86,11 +85,24 @@ func Package(k8sVersion string, gc bool) error {
 	if k8s == nil {
 		return utils.ProcessError(errors.New("k8s interface is nil"))
 	}
+	install := NewInstall(publicIP, k8sVersion)
 	logger.Info("3. install k8s[ " + k8sVersion + " ] : " + publicIP)
-	if err := k8s.InitK8sServer(); err != nil {
+	if err := install.pull(); err != nil {
 		return utils.ProcessError(err)
 	}
-	if err := k8s.RunK8sServer(); err != nil {
+	if err := install.merge(); err != nil {
+		return utils.ProcessError(err)
+	}
+	if err := k8s.InitCRI(); err != nil {
+		return utils.ProcessError(err)
+	}
+	if err := install.init(); err != nil {
+		return utils.ProcessError(err)
+	}
+	if err := k8s.PullImages(); err != nil {
+		return utils.ProcessError(err)
+	}
+	if err := install.runK8sServer(); err != nil {
 		return utils.ProcessError(err)
 	}
 	logger.Info("4. wait k8s[ " + k8sVersion + " ] pull all images: " + publicIP)
@@ -104,7 +116,7 @@ func Package(k8sVersion string, gc bool) error {
 		return utils.ProcessError(err)
 	}
 	logger.Info("5. k8s[ " + k8sVersion + " ] image save: " + publicIP)
-	if err := k8s.SaveImages(); err != nil {
+	if err := install.save(); err != nil {
 		return utils.ProcessError(err)
 	}
 	logger.Info("6. k8s[ " + k8sVersion + " ] uploading: " + publicIP)

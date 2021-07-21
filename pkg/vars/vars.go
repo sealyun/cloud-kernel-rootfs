@@ -16,6 +16,7 @@ type DownloadBin struct {
 	SealUtil   multiplatform.Vars
 	Sealer     multiplatform.Vars
 	SSHCmd     multiplatform.Vars
+	OSSUtil    multiplatform.Vars
 	Rootfs     multiplatform.Vars
 }
 
@@ -100,6 +101,7 @@ func LoadVars(k8sVersion, publicIP string, s sshutil.SSH) error {
 		SealUtil:   multiplatform.NewSeautil(defaultSealVersion, rootfs, p),
 		Sealer:     multiplatform.NewSealer(defaultSealVersion, p),
 		SSHCmd:     multiplatform.NewSSHCmd(defaultSSHCmdVersion, rootfs, p),
+		OSSUtil:    multiplatform.NewOSSUtil(p),
 	}
 	return nil
 }
