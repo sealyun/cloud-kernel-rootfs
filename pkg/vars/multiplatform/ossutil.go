@@ -29,17 +29,17 @@ type ossutil struct {
 
 func (c *ossutil) setWgetURL(platform Platform) {
 	//http://gosspublic.alicdn.com/ossutil/1.7.3/ossutil64
-	wurl := "http://gosspublic.alicdn.com/ossutil/1.7.3/ossutil64"
-	//splatform := ""
-	//switch platform {
-	//case LinuxAmd64: //nolint:typecheck
-	//	splatform = ""
-	//case LinuxArm64: //nolint:typecheck
-	//	splatform = "-arm64"
-	//default:
-	//	return
-	//}
-	c.wgetURL = wurl
+	//https://gosspublic.alicdn.com/ossutil/1.7.5/ossutilarm64
+	splatform := ""
+	switch platform {
+	case LinuxAmd64: //nolint:typecheck
+		splatform = "64"
+	case LinuxArm64: //nolint:typecheck
+		splatform = "arm64"
+	default:
+		return
+	}
+	c.wgetURL = fmt.Sprintf("http://gosspublic.alicdn.com/ossutil/1.7.5/ossutil%s", splatform)
 }
 func (c *ossutil) FetchWgetURL() string {
 	return c.wgetURL
