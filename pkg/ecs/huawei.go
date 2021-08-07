@@ -44,7 +44,7 @@ func (a *HuaweiEcs) Delete(instanceId []string, maxCount int) {
 	var response *model.DeleteServersResponse
 	var err error
 	for i := 0; i < maxCount; i++ {
-		logger.Error("循环删除ecs")
+		logger.Info("循环删除ecs")
 		response, err = client.DeleteInstances(instanceId, true)
 		if err != nil {
 			_ = cutils.ProcessCloudError(err)
