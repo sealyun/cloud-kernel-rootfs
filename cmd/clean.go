@@ -47,6 +47,16 @@ var cleanCmd = &cobra.Command{
 	},
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if vars.AkID == "" {
+			if v := os.Getenv("ECS_AKID"); v != "" {
+				vars.AkID = v
+			}
+		}
+		if vars.AkSK == "" {
+			if v := os.Getenv("ECS_AKSK"); v != "" {
+				vars.AkSK = v
+			}
+		}
+		if vars.AkID == "" {
 			logger.Fatal("云厂商的akId为空,无法清空虚拟机")
 			cmd.Help()
 			os.Exit(-1)
