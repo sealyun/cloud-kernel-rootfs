@@ -59,7 +59,7 @@ func (d *upload) Upload() error {
 		}
 		//kubernetes-amd64:v1.15 > kube-amd64-v1.15.tar
 		tarName := strings.ReplaceAll(imageName, "kubernetes", "kube")
-		tarName = strings.ReplaceAll(imageName, ":", "-")
+		tarName = strings.ReplaceAll(tarName, ":", "-")
 		tarName = tarName + ".tar"
 		tarShell := `cd cloud-kernel && sealer save -o  %s %s && \
 ossutil64 -c  oss-config cp -f %s oss://%s/%s`
