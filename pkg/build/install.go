@@ -59,7 +59,6 @@ git clone https://github.com/sealyun/cloud-kernel-rootfs && mv cloud-kernel-root
 func (d *install) merge() error {
 	merge := `cd cloud-kernel && mkdir -p rootfs && \
 mkdir -p rootfs/bin &&  mkdir -p rootfs/registry && \
-cp -rf runtime/rootfs/* rootfs/ && \
 cp -rf ../sealer/filesystem/rootfs/rootfs/* rootfs/ && \
 %s && \
 %s && \

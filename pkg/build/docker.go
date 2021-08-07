@@ -32,16 +32,27 @@ func NewDockerK8s(publicIP string, k8sVersion string) _package {
 func (d *dockerK8s) InitCRI() error {
 	var dockerShell = `
 cd cloud-kernel && cp -rf runtime/docker/* rootfs/   && \
-cp -rf ../sealer/filesystem/rootfs/docker/* rootfs/`
-	err := d.ssh.CmdAsync(d.publicIP, dockerShell)
+cp -rf ../sealer/filesystem/rootfs/docker/* rootfs/ && \
+mkdir -p rootfs/cri && cd rootfs/cri &&  %s `
+	docker := vars.Bin.Docker
+
+	allShell := fmt.Sprintf(dockerShell, docker.FinalShell())
+	err := d.ssh.CmdAsync(d.publicIP, allShell)
 	if err != nil {
 		return utils.ProcessError(err)
 	}
 	return nil
 }
 func (d *dockerK8s) PullImages() error {
-	var dockerShell = `docker pull fanux/lvscare`
-	err := d.ssh.CmdAsync(d.publicIP, dockerShell)
+	var dockerShell = `docker pull fanux/lvscare && cd cloud-kernel/rootfs && mkdir images && cd images && \
+docker pull %s && docker tag %s %s && docker save -o registry.tar %s && \
+docker rmi %s && docker rmi %s`
+	registry := vars.Bin.Registry
+	dockerName := registry.FetchWgetURL()
+	newName := vars.RegistryName
+	allShell := fmt.Sprintf(dockerShell, dockerName, dockerName, newName, newName, dockerName, newName)
+
+	err := d.ssh.CmdAsync(d.publicIP, allShell)
 	if err != nil {
 		return utils.ProcessError(err)
 	}

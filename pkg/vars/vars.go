@@ -18,6 +18,8 @@ type DownloadBin struct {
 	SSHCmd     multiplatform.Vars
 	OSSUtil    multiplatform.Vars
 	Rootfs     multiplatform.Vars
+	Docker     multiplatform.Vars
+	Registry   multiplatform.Vars
 }
 
 var (
@@ -34,15 +36,17 @@ var (
 	Platform         string
 	Bin              DownloadBin
 
-	defaultSealVersion    = "0.2.1"
-	defaultSSHCmdVersion  = "1.5.5"
-	defaultNerdctlVersion = "0.7.3"
-	defaultCriCtlVersion  = "1.20.0"
+	defaultSealVersion     = "0.2.1"
+	defaultSSHCmdVersion   = "1.5.5"
+	defaultNerdctlVersion  = "0.7.3"
+	defaultCriCtlVersion   = "1.20.0"
+	defaultDockerVersion   = "19.03.14"
+	defaultRegistryVersion = "2.7.1"
 )
 
 const (
-	EcsPassword = "Fanux#123"
-	Branch      = "main"
+	EcsPassword  = "Fanux#123"
+	RegistryName = "registry:2.7.1"
 )
 
 func LoadAKSK() {
@@ -102,6 +106,8 @@ func LoadVars(k8sVersion, publicIP string, s sshutil.SSH) error {
 		Sealer:     multiplatform.NewSealer(defaultSealVersion, p),
 		SSHCmd:     multiplatform.NewSSHCmd(defaultSSHCmdVersion, rootfs, p),
 		OSSUtil:    multiplatform.NewOSSUtil(p),
+		Docker:     multiplatform.NewDocker(defaultDockerVersion, rootfs, p),
+		Registry:   multiplatform.NewRegistry(defaultRegistryVersion, p),
 	}
 	return nil
 }
@@ -116,6 +122,7 @@ func loadVersion(publicIP string, s sshutil.SSH) {
 	sealerVersion := "curl -LsSf https://api.github.com/repos/alibaba/sealer/releases/latest | jq -r \".tag_name\""
 	sshcmdVersion := "curl -LsSf https://api.github.com/repos/cuisongliu/sshcmd/releases/latest | jq -r \".tag_name\""
 	nerdVersion := "curl -LsSf https://api.github.com/repos/containerd/nerdctl/releases/latest | jq -r \".tag_name\""
+	crictlVersion := "curl -LsSf https://api.github.com/repos/kubernetes-sigs/cri-tools/releases/latest | jq -r \".tag_name\""
 
 	if version := s.CmdToString(publicIP, sealerVersion, ""); version != "" {
 		defaultSealVersion = strings.ReplaceAll(version, "v", "")
@@ -128,5 +135,9 @@ func loadVersion(publicIP string, s sshutil.SSH) {
 	if version := s.CmdToString(publicIP, nerdVersion, ""); version != "" {
 		defaultNerdctlVersion = strings.ReplaceAll(version, "v", "")
 		logger.Info("获取nerdctl最新版本: %s", defaultNerdctlVersion)
+	}
+	if version := s.CmdToString(publicIP, crictlVersion, ""); version != "" {
+		defaultCriCtlVersion = strings.ReplaceAll(version, "v", "")
+		logger.Info("获取crictl最新版本: %s", defaultCriCtlVersion)
 	}
 }

@@ -36,7 +36,7 @@ type crictl struct { //nolint:typecheck
 }
 
 func (c *crictl) setWgetURL(platform Platform) {
-	wurl := "https://sealyun.oss-accelerate.aliyuncs.com/tools/crictl-v%s-%s.tar.gz"
+	wurl := "https://github.com/kubernetes-sigs/cri-tools/releases/download/v%s/crictl-v%s-%s.tar.gz"
 	splatform := ""
 	switch platform {
 	case LinuxAmd64: //nolint:typecheck
@@ -46,7 +46,7 @@ func (c *crictl) setWgetURL(platform Platform) {
 	default:
 		return
 	}
-	c.wgetURL = fmt.Sprintf(wurl, c.Version, splatform)
+	c.wgetURL = fmt.Sprintf(wurl, c.Version, c.Version, splatform)
 }
 
 func (c *crictl) FetchWgetURL() string {
