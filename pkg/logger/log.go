@@ -113,7 +113,7 @@ func NewLogger(depth ...int) *LocalLogger {
 	}
 	l.appName = "[" + appSn + "]"
 	l.callDepth = dep
-	l.SetLogger(AdapterConsole)
+	_ = l.SetLogger(AdapterConsole)
 	l.timeFormat = logTimeDefaultFormat
 	return l
 }
@@ -222,7 +222,7 @@ func (this *LocalLogger) writeToLoggers(when time.Time, msg *loginfo, level int)
 
 func (this *LocalLogger) writeMsg(logLevel int, msg string, v ...interface{}) error {
 	if !this.init {
-		this.SetLogger(AdapterConsole)
+		_ = this.SetLogger(AdapterConsole)
 	}
 	msgSt := new(loginfo)
 	src := ""
@@ -264,22 +264,22 @@ func (this *LocalLogger) Panic(format string, args ...interface{}) {
 
 // Emer Log EMERGENCY level message.
 func (this *LocalLogger) Emer(format string, v ...interface{}) {
-	this.writeMsg(LevelEmergency, format, v...)
+	_ = this.writeMsg(LevelEmergency, format, v...)
 }
 
 // Alert Log ALERT level message.
 func (this *LocalLogger) Alert(format string, v ...interface{}) {
-	this.writeMsg(LevelAlert, format, v...)
+	_ = this.writeMsg(LevelAlert, format, v...)
 }
 
 // Crit Log CRITICAL level message.
 func (this *LocalLogger) Crit(format string, v ...interface{}) {
-	this.writeMsg(LevelCritical, format, v...)
+	_ = this.writeMsg(LevelCritical, format, v...)
 }
 
 // Error Log ERROR level message.
 func (this *LocalLogger) Error(format string, v ...interface{}) {
-	this.writeMsg(LevelError, format, v...)
+	_ = this.writeMsg(LevelError, format, v...)
 }
 
 // Warn Log WARNING level message.
@@ -340,7 +340,7 @@ func SetLogPath(show bool) {
 func SetLogger(param ...string) error {
 	if 0 == len(param) {
 		//默认只输出到控制台
-		defaultLogger.SetLogger(AdapterConsole)
+		_ = defaultLogger.SetLogger(AdapterConsole)
 		return nil
 	}
 
@@ -378,7 +378,7 @@ func SetLogger(param ...string) error {
 	}
 	if conf.File != nil {
 		file, _ := json.Marshal(conf.File)
-		defaultLogger.SetLogger(AdapterFile, string(file))
+		_ = defaultLogger.SetLogger(AdapterFile, string(file))
 	}
 	if conf.Conn != nil {
 		conn, _ := json.Marshal(conf.Conn)
@@ -439,9 +439,9 @@ func Trace(f interface{}, v ...interface{}) {
 
 func formatLog(f interface{}, v ...interface{}) string {
 	var msg string
-	switch f.(type) {
+	switch data := f.(type) {
 	case string:
-		msg = f.(string)
+		msg = data
 		if len(v) == 0 {
 			return msg
 		}
@@ -459,12 +459,4 @@ func formatLog(f interface{}, v ...interface{}) string {
 		msg += strings.Repeat(" %v", len(v))
 	}
 	return fmt.Sprintf(msg, v...)
-}
-
-func stringTrim(s string, cut string) string {
-	ss := strings.SplitN(s, cut, 2)
-	if len(ss) == 1 {
-		return ss[0]
-	}
-	return ss[1]
 }

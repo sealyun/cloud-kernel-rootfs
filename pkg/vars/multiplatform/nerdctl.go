@@ -47,7 +47,6 @@ func (c *nerdctl) setWgetURL(platform Platform) { //nolint:typecheck
 		return
 	}
 	c.wgetURL = fmt.Sprintf(wurl, c.Version, c.Version, splatform)
-	return
 }
 func (c *nerdctl) FetchWgetURL() string {
 	return c.wgetURL

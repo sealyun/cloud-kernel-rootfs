@@ -88,6 +88,7 @@ func init() {
 	runCmd.Flags().StringVar(&vars.RegistryPassword, "rpass", "", "镜像仓库登录密码")
 	runCmd.Flags().StringVar(&vars.RegistryAddress, "raddr", "registry-vpc.cn-hongkong.aliyuncs.com", "镜像仓库地址,这里最好填写香港仓库地址")
 	runCmd.Flags().StringVar(&vars.RegistryRepo, "rrepo", "", "镜像仓库名称")
+	runCmd.Flags().BoolVar(&vars.Release, "release", false, "是否为release版本")
 
 	runCmd.Flags().StringVar(&vars.DingDing, "dingding", "", "钉钉的Token")
 	runCmd.Flags().StringVar(&vars.Platform, "platform", "linux/amd64", "编译架构")

@@ -38,8 +38,8 @@ func TestLogOut(t *testing.T) {
 func TestLogConfigReload(t *testing.T) {
 	go func() {
 		for {
-			for level, _ := range LevelMap {
-				SetLogger(fmt.Sprintf(`{
+			for level := range LevelMap {
+				_ = SetLogger(fmt.Sprintf(`{
 					"Console": {
 						"level": "%s",
 						"color": true
@@ -94,7 +94,7 @@ func TestLogTimeFormat(t *testing.T) {
 		"StampNano":   "Jan _2 15:04:05.000000000",
 	}
 	for timeType, format := range formats {
-		SetLogger(fmt.Sprintf(`{
+		_ = SetLogger(fmt.Sprintf(`{
 					"TimeFormat":"%s",
 					"Console": {
 						"level": "TRAC",

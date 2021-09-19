@@ -6,8 +6,11 @@ import (
 	"github.com/sealyun/cloud-kernel-rootfs/pkg/logger"
 	"github.com/sealyun/cloud-kernel-rootfs/pkg/retry"
 	"github.com/sealyun/cloud-kernel-rootfs/pkg/sshcmd/sshutil"
+	"github.com/sealyun/cloud-kernel-rootfs/pkg/templates"
 	"github.com/sealyun/cloud-kernel-rootfs/pkg/utils"
 	"github.com/sealyun/cloud-kernel-rootfs/pkg/vars"
+	"io/ioutil"
+	"path"
 	"time"
 )
 
@@ -31,8 +34,7 @@ func NewDockerK8s(publicIP string, k8sVersion string) _package {
 }
 func (d *dockerK8s) InitCRI() error {
 	var dockerShell = `
-cd cloud-kernel && cp -rf runtime/docker/* rootfs/   && \
-cp -rf ../sealer/filesystem/rootfs/docker/* rootfs/ && \
+cd cloud-kernel && cp -rf ../sealer/filesystem/rootfs/docker/* rootfs/ && \
 mkdir -p rootfs/cri && cd rootfs/cri &&  %s `
 	docker := vars.Bin.Docker
 
@@ -76,5 +78,15 @@ func (d *dockerK8s) WaitImages() error {
 	if err != nil {
 		return utils.ProcessError(err)
 	}
+	return nil
+}
+
+func (d *dockerK8s) SaveImagesShell() error {
+	shellLN := path.Join(utils.GetUserHomeDir(), ".cloud-kernel-rootfs", "save-images-docker.sh")
+	err := ioutil.WriteFile(shellLN, []byte(templates.SaveImageDocker), 0755)
+	if err != nil {
+		return utils.ProcessError(err)
+	}
+	d.ssh.Copy(d.publicIP, shellLN, "cloud-kernel/rootfs/scripts/save-images.sh")
 	return nil
 }

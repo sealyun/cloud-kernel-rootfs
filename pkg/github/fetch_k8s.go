@@ -90,7 +90,7 @@ func getUrl(rawurl string) ([]byte, error) {
 		return nil, err
 	}
 	buf := bytes.NewBuffer(nil)
-	_, err = io.Copy(buf, resp.Body)
+	_, _ = io.Copy(buf, resp.Body)
 	_ = resp.Body.Close()
 	return ioutil.ReadAll(buf)
 }

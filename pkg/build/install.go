@@ -17,10 +17,13 @@ package build
 
 import (
 	"fmt"
+	"github.com/sealyun/cloud-kernel-rootfs/pkg/logger"
 	"github.com/sealyun/cloud-kernel-rootfs/pkg/sshcmd/sshutil"
 	"github.com/sealyun/cloud-kernel-rootfs/pkg/templates"
 	"github.com/sealyun/cloud-kernel-rootfs/pkg/utils"
 	"github.com/sealyun/cloud-kernel-rootfs/pkg/vars"
+	"os"
+	"path"
 	"strings"
 )
 
@@ -47,7 +50,7 @@ func (i *install) pull() error {
 	oss := vars.Bin.OSSUtil.FinalShell()
 	pull := `%s && yum install -y git conntrack tree && \
 git clone https://github.com/alibaba/sealer && \
-git clone https://github.com/sealyun/cloud-kernel-rootfs && mv cloud-kernel-rootfs cloud-kernel`
+mkdir -p cloud-kernel`
 	shell := fmt.Sprintf(pull, oss)
 	err := i.ssh.CmdAsync(i.publicIP, shell)
 	if err != nil {
@@ -93,6 +96,15 @@ func (d *install) runK8sServer() error {
 	writeKubeadm := `cd cloud-kernel/rootfs && echo '%s' > etc/kubeadm-config.yaml`
 	//
 	kubeadm := &templates.Kubeadm{K8sVersion: version}
+	var cgroupShell string
+	if templates.VersionCompare(version, templates.V1200) {
+		cgroupShell = templates.ContainerdShell
+	} else {
+		cgroupShell = templates.DockerShell
+	}
+	cgroupDriver := d.ssh.CmdToString(d.publicIP, cgroupShell, " ")
+	kubeadm.CriCGroupDriver = cgroupDriver
+
 	writeShell := fmt.Sprintf(writeKubeadm, kubeadm.TemplateConvert())
 	err := d.ssh.CmdAsync(d.publicIP, writeShell)
 	if err != nil {
@@ -127,8 +139,18 @@ kubectl taint nodes --all node-role.kubernetes.io/master- `
 	}
 	return nil
 }
-
+func (d *install) initSaveImageShellFile() error {
+	logger.Debug("initSaveImageShellFile init .cloud-kernel-rootfs dir for host ")
+	if !utils.FileExist(path.Join(utils.GetUserHomeDir(), ".cloud-kernel-rootfs")) {
+		err := os.MkdirAll(path.Join(utils.GetUserHomeDir(), ".cloud-kernel-rootfs"), os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
 func (d *install) save() error {
+
 	rootfs := vars.Bin.Rootfs
 	saveShell := `cd cloud-kernel/rootfs/scripts &&  \
 sh save-images.sh && \

@@ -13,28 +13,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package templates
+package utils
 
 import (
-	"bytes"
-	"text/template"
+	"os"
 )
 
-type Templates interface {
-	Template() string
-	TemplateConvert() string
+func FileExist(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil || os.IsExist(err)
 }
 
-func templateFromContent(templateContent string, param map[string]interface{}) (string, error) {
-	tmpl, err := template.New("text").Parse(templateContent)
-	if err != nil {
-		return "", err
-	}
-	var buffer bytes.Buffer
-	err = tmpl.Execute(&buffer, param)
-	bs := buffer.Bytes()
-	if nil != bs && len(bs) > 0 {
-		return string(bs), nil
-	}
-	return "", err
+func GetUserHomeDir() string {
+	home, _ := os.UserHomeDir()
+	return home
 }

@@ -19,11 +19,12 @@ import (
 	"fmt"
 )
 
-func NewRootfs(version string, platform Platform) Vars {
+func NewRootfs(version string, platform Platform, release bool) Vars {
 	v := &rootfs{
 		info: info{
 			Version: version,
 		},
+		release: release,
 	}
 	v.setPlatform(platform)
 	return v
@@ -33,6 +34,7 @@ type rootfs struct {
 	info
 	imageName string
 	tarName   string
+	release   bool
 }
 
 func (c *rootfs) setPlatform(platform Platform) {
@@ -45,8 +47,12 @@ func (c *rootfs) setPlatform(platform Platform) {
 	default:
 		return
 	}
-	c.imageName = fmt.Sprintf("kubernetes-%s:v%s", splatform, c.Version)
-	c.tarName = fmt.Sprintf("kube-%s-v%s.tar", splatform, c.Version)
+	Version := c.Version
+	if !c.release {
+		Version = c.Version + "_develop"
+	}
+	c.imageName = fmt.Sprintf("kubernetes-%s:v%s", splatform, Version)
+	c.tarName = fmt.Sprintf("kube-%s-v%s.tar", splatform, Version)
 }
 
 func (c *rootfs) FetchWgetURL() string {

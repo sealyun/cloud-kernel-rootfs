@@ -34,6 +34,7 @@ var (
 	RegistryRepo     string
 	RegistryPassword string
 	Platform         string
+	Release          bool
 	Bin              DownloadBin
 
 	defaultSealVersion     = "0.2.1"
@@ -100,7 +101,7 @@ func LoadVars(k8sVersion, publicIP string, s sshutil.SSH) error {
 	Bin = DownloadBin{
 		CriCtl:     multiplatform.NewCriCTL(defaultCriCtlVersion, rootfs, p),
 		Kubernetes: multiplatform.NewKubernetes(k8sVersion, rootfs, p),
-		Rootfs:     multiplatform.NewRootfs(k8sVersion, p),
+		Rootfs:     multiplatform.NewRootfs(k8sVersion, p, Release),
 		NerdCtl:    multiplatform.NewNerdctl(defaultNerdctlVersion, rootfs, p),
 		SealUtil:   multiplatform.NewSeautil(defaultSealVersion, rootfs, p),
 		Sealer:     multiplatform.NewSealer(defaultSealVersion, p),

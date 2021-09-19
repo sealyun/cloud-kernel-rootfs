@@ -40,7 +40,7 @@ var cleanCmd = &cobra.Command{
 			c = &ecs.HuaweiEcs{}
 		default:
 			logger.Fatal("不支持该类型的云厂商")
-			cmd.Help()
+			_ = cmd.Help()
 			os.Exit(0)
 		}
 		c.Delete(instanceIds, 10)
@@ -63,7 +63,7 @@ var cleanCmd = &cobra.Command{
 		}
 		if vars.AkSK == "" {
 			logger.Fatal("云厂商的akSK为空,无法清空虚拟机")
-			cmd.Help()
+			_ = cmd.Help()
 			os.Exit(0)
 		}
 		if len(instanceIds) == 0 {

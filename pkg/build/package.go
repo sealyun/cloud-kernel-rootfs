@@ -16,10 +16,10 @@ type _package interface {
 	InitCRI() error
 	PullImages() error
 	WaitImages() error
+	SaveImagesShell() error
 }
 
 func Package(k8sVersion string, gc bool) error {
-
 	instance := ecs.NewCloud().New(1, false, true)
 	if instance == nil {
 		return errors.New("create ecs is error")
@@ -116,6 +116,13 @@ func Package(k8sVersion string, gc bool) error {
 		return utils.ProcessError(err)
 	}
 	logger.Info("5. k8s[ " + k8sVersion + " ] image save: " + publicIP)
+	if err := install.initSaveImageShellFile(); err != nil {
+		return utils.ProcessError(err)
+	}
+	logger.Debug("copy save-images-docker.sh to remote path cloud-kernel/rootfs/scripts/save-images.sh ")
+	if err := k8s.SaveImagesShell(); err != nil {
+		return utils.ProcessError(err)
+	}
 	if err := install.save(); err != nil {
 		return utils.ProcessError(err)
 	}

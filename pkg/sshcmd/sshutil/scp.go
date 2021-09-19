@@ -267,7 +267,7 @@ func (ss *SSH) CopyLocalToRemote(host, localPath, remotePath string) {
 	} else {
 		baseRemoteFilePath := filepath.Dir(remotePath)
 		mkDstDir := fmt.Sprintf("mkdir -p %s || true", baseRemoteFilePath)
-		ss.CmdAsync(host, mkDstDir)
+		_ = ss.CmdAsync(host, mkDstDir)
 		ss.copyLocalFileToRemote(host, sshClient, sftpClient, localPath, remotePath)
 	}
 }
@@ -283,7 +283,7 @@ func (ss *SSH) copyLocalDirToRemote(host string, sshClient *ssh.Client, sftpClie
 	if err != nil {
 		panic(1)
 	}
-	sftpClient.Mkdir(remotePath)
+	_ = sftpClient.Mkdir(remotePath)
 	for _, file := range localFiles {
 		lfp := path.Join(localPath, file.Name())
 		rfp := path.Join(remotePath, file.Name())

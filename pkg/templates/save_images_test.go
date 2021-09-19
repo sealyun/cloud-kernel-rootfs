@@ -16,25 +16,14 @@ limitations under the License.
 package templates
 
 import (
-	"bytes"
-	"text/template"
+	"io/ioutil"
+	"testing"
 )
 
-type Templates interface {
-	Template() string
-	TemplateConvert() string
-}
-
-func templateFromContent(templateContent string, param map[string]interface{}) (string, error) {
-	tmpl, err := template.New("text").Parse(templateContent)
-	if err != nil {
-		return "", err
-	}
-	var buffer bytes.Buffer
-	err = tmpl.Execute(&buffer, param)
-	bs := buffer.Bytes()
-	if nil != bs && len(bs) > 0 {
-		return string(bs), nil
-	}
-	return "", err
+func Test_SaveImages(t *testing.T) {
+	//shell:="cat >  save-images.sh <<eof \n%seof"
+	//writeShell := fmt.Sprintf(shell,SaveImageDocker)
+	//
+	//fmt.Printf(writeShell)
+	ioutil.WriteFile("/Users/cuisongliu/save-images.sh", []byte(SaveImageDocker), 0755)
 }

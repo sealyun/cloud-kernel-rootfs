@@ -115,7 +115,7 @@ func (ss *SSH) readFile(name string) []byte {
 }
 
 func (ss *SSH) addrReformat(host string) string {
-	if strings.Index(host, ":") == -1 {
+	if !strings.Contains(host, ":") {
 		host = fmt.Sprintf("%s:22", host)
 	}
 	return host
